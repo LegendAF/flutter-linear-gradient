@@ -1,16 +1,31 @@
 # flutter_linear_gradient
 
-A new Flutter project.
+GradientTransform doesn't act as I would expect but based on the [docs](https://main-api.flutter.dev/flutter/painting/GradientTransform-class.html) it's [working as intended](https://github.com/flutter/flutter/issues/157475#issuecomment-2445531136).
 
-## Getting Started
+If you want a working solution you can do something like:
 
-This project is a starting point for a Flutter application.
+```
+Alignment alignmentFromDegrees(double degree) {
+  final x = cos(degree * pi / 180);
+  final y = sin(degree * pi / 180);
+  final xAbs = x.abs();
+  final yAbs = y.abs();
 
-A few resources to get you started if this is your first Flutter project:
+  if ((0.0 < xAbs && xAbs < 1.0) || (0.0 < yAbs && yAbs < 1.0)) {
+    return Alignment(-x, -y) *
+        ((1 / xAbs) < (1 / yAbs) ? (1 / xAbs) : (1 / yAbs));
+  } else {
+    return Alignment(-x, -y);
+  }
+}
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+const LinearGradient(
+  begin: alignmentFromDegrees(90),
+  end: -alignmentFromDegrees(90),
+  colors: [
+    Colors.black,
+    Colors.white,
+  ],
+  stops: [0, 1],
+);
+```
